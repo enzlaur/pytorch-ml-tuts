@@ -1,0 +1,6 @@
+
+data/MNIST/processed/
+
+data/MNIST/raw/
+
+*.npy
