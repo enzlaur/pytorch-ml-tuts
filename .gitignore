@@ -4,3 +4,7 @@ data/MNIST/processed/
 data/MNIST/raw/
 
 *.npy
+
+data/cifar-10-batches-py/
+
+data/cifar-10-python.tar.gz
