@@ -20,3 +20,30 @@ def load_ecg_file(ecg_file):
     
     return ecg_data
 
+def load_signal(data_name, folder='ecg_data/', v_fields=False, channel=1):
+    """
+    Loads signals and fields from a ``WFDB.RDSAMP``
+
+    Returns:
+        1D array of signals (entire record)
+        signals, fields (from wfdb.rdsamp).
+
+        Usage:
+            signals, fields = wfdb.rdsamp(...)
+
+    Parameters:
+
+        data_name (str): File name from MIT-BIH (e.g. ``100``, ``124e06``).
+        folder (str): folder directory from within this notebook, add '/' at the end (e.g. ```ecg_data```)
+        v_fields (bool): True to have function print signal's fields attribute
+
+    Example:
+        load_signal('100', 'ecg_data'/)
+    """
+    file_address = folder + data_name
+    signals, fields = wfdb.rdsamp(file_address, channels=[channel])
+    if v_fields == True:
+        print("Printing fields information of the signal: ")
+        print(fields)
+    # return signals from the sample
+    return signals
