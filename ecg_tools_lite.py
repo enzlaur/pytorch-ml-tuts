@@ -49,6 +49,28 @@ def load_signal(data_name, folder='ecg_data/', v_fields=False, channel=1):
     return signals
 
 # ============= NORMALIZATION =============
+
+def get_max_abs(sigs):
+    max_val = 0
+    for i in range(sigs.shape[0]):
+        for j in range(sigs.shape[1]):
+            if abs(sigs[i][j]) > max_val:
+                max_val = abs(sigs[i][j])
+    # return max_val
+    return max_val
+
+def get_avg(sigs):
+    # get average value
+    sums = 0
+    avg = 0
+
+    for i in range(sigs.shape[0]):
+        for j in range(sigs.shape[1]):
+            sums = sigs[i][j] + sums
+    avg = sums / (sigs.shape[0] * sigs.shape[1])
+    # return average
+    return avg
+
 def normalize(sigs):
     # subtract by avg value / max of absolute value
     #  e.g.: [sigs](-5.635) -  [avg](-8.70) / 9.135 = -1.569
