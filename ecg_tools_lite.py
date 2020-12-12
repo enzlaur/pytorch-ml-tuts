@@ -50,6 +50,15 @@ def load_signal(data_name, folder='ecg_data/', v_fields=False, channel=1):
 
 # ============= NORMALIZATION =============
 
+def norm_sig( ecg_set ):
+    ecg_set_normed = ecg_set
+    
+    for i, sig in enumerate(ecg_set):
+        sig = norm_global_prime(sig)
+        ecg_set_normed[i] = sig
+    
+    return ecg_set_normed
+
 def norm_global( x ):
     """
     Normalized from [0,1] [min, max]
