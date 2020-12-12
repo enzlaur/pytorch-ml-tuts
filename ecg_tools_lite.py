@@ -50,81 +50,23 @@ def load_signal(data_name, folder='ecg_data/', v_fields=False, channel=1):
 
 # ============= NORMALIZATION =============
 
-def get_max_abs(sigs):
-    max_val = 0
-    for i in range(sigs.shape[0]):
-        for j in range(sigs.shape[1]):
-            if abs(sigs[i][j]) > max_val:
-                max_val = abs(sigs[i][j])
-    # return max_val
-    return max_val
-
-def get_avg(sigs):
-    # get average value
-    sums = 0
-    avg = 0
-
-    for i in range(sigs.shape[0]):
-        for j in range(sigs.shape[1]):
-            sums = sigs[i][j] + sums
-    avg = sums / (sigs.shape[0] * sigs.shape[1])
-    # return average
-    return avg
-
-def normalize(sigs):
-    # subtract by avg value / max of absolute value
-    #  e.g.: [sigs](-5.635) -  [avg](-8.70) / 9.135 = -1.569
-    avg = get_avg(sigs)
-    max_val = get_max_abs(sigs)
-    normed = np.zeros(shape=(sigs.shape[0], sigs.shape[1]))
-
-    for i in range(sigs.shape[0]):
-        for j in range(sigs.shape[1]):
-            normed[i][j] = (sigs[i][j] - avg) / max_val
-
-    return normed
-
-def per_chunk_max_val(sig):
-    max_val = 0
-    for i in range(sig.shape[0]):
-            if abs(sig[i]) > max_val:
-                max_val = abs(sig[i])
-    
-    return max_val
-
-def per_chunk_avg(sig):
-    sums = 0
-    avg = sig.shape[0]
-    for i in range(len(sig)):
-        sums = sums + sig[i]
-    avg = sums / avg
-
-    return avg
-
-def per_chunk_norm(sig):
-    avg = per_chunk_avg(sig)
-    max_abs_val = per_chunk_max_val(sig)
-    # print("average " + str(avg) + "||" + "max_abs " + str(max_val)) 
-    normed = np.zeros(shape=(sig.shape[0]))
-    for i in range( len(sig) ):
-        normed[i] = (sig[i] - avg) / max_abs_val
-    
-    return normed
-
-def normalize_by_chunks(sigs):
+def norm_global( x ):
     """
-    Normalizes ecg signal based on sampling frequency chunk (e.g. denominator of the mean is the sampling frequency and not the entire ecg signal)
-
-    Returns::
-        sigs (nd array): normalized ECG signal
-
-    Paramter::
-        sigs (nd array): original ECG signal
+    Normalized from [0,1] [min, max]
     """
-    for i in range(sigs.shape[0]):
-        sigs[i] = per_chunk_norm(sigs[i])
+    x_prime = (x - x.min()) / (x.max() - x.min() )
+    return x_prime
 
-    return sigs
+def norm_global_prime( x ):
+    """
+    Normalized from [-1,1] [min, max] (uses norm_global(x) )
+    """
+    x = norm_global(x)
+    x_prime = (2*x)-1
+    return x_prime
+
+def norm_ecg_subsets( ecg_sig ):
+    pass
 
 def get_samples(data_name, samp_freq=360, channel=0, norm_type=''):
     """
