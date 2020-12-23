@@ -1,22 +1,66 @@
-# Import OS
-import os
-# Import Pytorch
 import torch
 from torch import nn
 from torch.autograd import Variable
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Dataset, random_split
+
+# Summary-like from Tensorflow
+from torchsummary import summary
+
 # Import Numpy
 import numpy as np
+# Plot Import
+import matplotlib.pyplot as plt
+# For timer
+import time
+# Import OS
+import os
+# import local libs
+import ecg_tools_lite as et
 
-def load_all_ecg_file(ecg_file):
-    """
-    Unfortunately, the generated files already have sampling frequency into it but not normalized (sad)
-    """
-    ecg_data = np.load(ecg_file)
-    ecg_data = np.reshape( ecg_data, newshape=(ecg_data.shape[0], ecg_data.shape[1]) )
-    # ecg_data = normalize_by_chunks(ecg_data)
-    ecg_data = np.reshape( ecg_data, newshape=(ecg_data.shape[0], ecg_data.shape[1], 1) )
-    return ecg_data
+from statistics import mean
 
-class autoencoder( nn.Module ):
-    pass
+# ---- SAFE MODEL ----
+kernel_size = 16
+padding_size= int( (kernel_size/2) ) # If odd, add -1
+
+class autoencoder(nn.Module):
+    def __init__(self):
+        super(autoencoder, self).__init__()
+
+        self.encoder = nn.Sequential(
+            nn.Conv1d(1, 40, kernel_size, stride=2, padding=7 ), nn.ELU(True), # 521
+            nn.BatchNorm1d(40),
+            nn.Conv1d(40, 20, kernel_size, stride=2, padding=7 ), nn.ELU(True), # 521
+            nn.BatchNorm1d(20),
+            nn.Conv1d(20, 20, kernel_size, stride=2, padding=7 ), nn.ELU(True), # 521
+            nn.BatchNorm1d(20),
+            nn.Conv1d(20, 20, kernel_size, stride=2, padding=7 ), nn.ELU(True), # 521
+            nn.BatchNorm1d(20),
+            nn.Conv1d(20, 40, kernel_size, stride=2, padding=8 ), nn.ELU(True), # 521
+            nn.BatchNorm1d(40),
+            nn.Conv1d(40, 1, kernel_size, stride=1, padding=7 ), nn.ELU(True), # 521
+            nn.BatchNorm1d(1),
+        )
+
+        self.decoder = nn.Sequential(
+            nn.ConvTranspose1d(1, 40, kernel_size, stride=1, padding=7 ), nn.ELU(True), # 521
+            nn.BatchNorm1d(40),
+            nn.ConvTranspose1d(40, 20, kernel_size, stride=2, padding=8 ), nn.ELU(True), # 521
+            nn.BatchNorm1d(20),
+            nn.ConvTranspose1d(20, 20, kernel_size, stride=2, padding=7 ), nn.ELU(True), # 521
+            nn.BatchNorm1d(20),
+            nn.ConvTranspose1d(20, 20, kernel_size, stride=2, padding=7 ), nn.ELU(True), # 521
+            nn.BatchNorm1d(20),
+            nn.ConvTranspose1d(20, 40, kernel_size, stride=2, padding=7 ), nn.ELU(True), # 521
+            nn.BatchNorm1d(40),
+            nn.ConvTranspose1d(40, 1, kernel_size, stride=2, padding=7 ), nn.ELU(True), # 521
+            nn.BatchNorm1d(1),
+            # nn.ConvTranspose1d(1, 1, kernel_size, stride=1, padding=7 ), nn.ELU(True), # 521
+            # nn.BatchNorm1d(1),
+        )
+
+    def forward(self, x):
+        x = self.encoder(x)
+        x = self.decoder(x)
+
+        return x
