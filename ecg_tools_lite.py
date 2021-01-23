@@ -3,7 +3,6 @@ import wfdb
 import peakutils
 import numpy as np
 import pandas as pd
-import tensorflow as tf
 # froms
 from sklearn import preprocessing # for normalizing data
 # For test data splitting
@@ -59,12 +58,14 @@ def norm_sig( ecg_set ):
     
     return ecg_set_normed
 
+
 def norm_global( x ):
     """
     Normalized from [0,1] [min, max]
     """
     x_prime = (x - x.min()) / (x.max() - x.min() )
     return x_prime
+
 
 def norm_global_prime( x ):
     """
@@ -74,50 +75,16 @@ def norm_global_prime( x ):
     x_prime = (2*x)-1
     return x_prime
 
-def norm_ecg_subsets( ecg_sig ):
-    pass
+# ============= 
 
-def get_samples(data_name, samp_freq=360, channel=0, norm_type=''):
-    """
-    Returns:
+def norm_ecg_subsets( ecg_denoised_flat, ecg_clean_flat ):
+    diff = ecg_clean_flat[0] - ecg_denoised_flat[0]
+    adjusted_ecg_flat = ecg_denoised_flat + diff
+    return adjusted_ecg_flat
 
-        signal (list): 2D array-like list [x][y] (not numpy) where first index is chunks and the 2nd index contains sample points from a single iteration determined by your cycle_len.
-        The selected channel will automatically be V1
 
-    Parameters::
 
-        data_name (str): File name to be accessed (from MIT-BIH/Physionet) (e.g. ``100``, ``124e06``)
-        samp_freq (int): Sample frequecy determined by you source 
-        channel (int): Channel from the signal to use
-        norm_type (str): Default is '', options are ``chunks`` and ``all``. Chunks option is divided by sampling frequency, all option is dividing by average of all datapoints in the entire signal
-
-    Example:
-
-        get_samples(data_name='100', samp_freq=360)
-    """
-    # load the signal via wfdb
-    signal = load_signal(data_name=data_name, channel=channel)
-    
-    chunks = int(len(signal) / samp_freq)
-    
-    signal_list = np.zeros(shape=(chunks, samp_freq))
-    
-    sig_counter = 0
-    for i in range(chunks):
-        for j in range(samp_freq):
-            signal_list[i][j] = signal[sig_counter]
-            sig_counter = sig_counter + 1
-
-    # Perform normalization.
-    # normalization per chunk (normalizes data points as divided by sampling frequency)
-    if str.lower(norm_type) == 'chunks' or str.lower(norm_type) == 'chunk':
-        signal_list = normalize_by_chunks(signal_list)
-    if str.lower(norm_type) == 'all':
-        signal_list = normalize(signal_list)
-    if str.lower(norm_type) == 'none':
-        pass
-
-    return signal_list
+# ================ DATA MANIPULATION ================
 
 def split_ecg_segments(ecg_data, start_minute=5):
     """
@@ -166,57 +133,105 @@ def split_ecg_segments(ecg_data, start_minute=5):
 
     return noised_seg, clean_seg
 
-# Default GET_ECG method to use. Don't use others anymore huhu
-def get_ecg_with_split(data_name, samp_freq=360, norm_type='chunks', channel=1):
-    """
-    DEFAULT GET_ECG METHOD TO USE
     
-    Use when samp_freq is not 360 (specifically the 1024 sampling frequency)
+def realign_starting(ecg_result, ecg_clean):
+    pass
+    
 
-    Returns:
-        noised_seg, clean_seg (Numpy Array):
-            Wherein both arrays contains time-specific segments of noise and untouched ECG from the NST generator.
-    """
-    # load everything with a sampling frequency of 360 (easier to split)
-    x = get_samples(data_name, samp_freq=360, channel=channel, norm_type='') # must not normalize in this part yet
-    # Split into two (using 360 as sampling frequency as 360Hz == 1 second)
-    noised_seg, clean_seg = split_ecg_segments(x)
-    # Flatten the arrays noised_seg and clean_seg into 1D
-    noised_seg = noised_seg.flatten()
-    clean_seg = clean_seg.flatten()
-    # Once flatten, return both ECG's according to their sampling frequency
-    # Get the appropriate length for chunks first
-    chunks_noised = int( len(noised_seg) / samp_freq )
-    chunks_clean = int( len(clean_seg) / samp_freq )
-    chunks = 0
-    # Assures that the smaller chunk size is followed for consistency (esp during training). 
-    if chunks_noised < chunks_clean:
-        chunks = chunks_noised
-    elif chunks_noised > chunks_clean:
-        chunks = chunks_clean
-    else:
-        chunks = chunks_noised
-    # create the np arrays to be returned
-    noised_seg_new = np.zeros( (int(chunks/2), samp_freq) ) # why + 1, idk yet
-    clean_seg_new = np.zeros( (int(chunks/2), samp_freq) )
-    # Proceed to migrate into 2D Arrays
-    for i in range( chunks - 1 ):
-        if i % 2 == 0:
-            noised_seg_new[ int(i/2) ] = noised_seg[ (samp_freq*i):((samp_freq*i)+samp_freq) ]
-        else:
-            clean_seg_new[ int(i/2 )] = clean_seg[ (samp_freq*i):((samp_freq*i)+samp_freq) ]
+#     """
+#     Returns:
+
+#         signal (list): 2D array-like list [x][y] (not numpy) where first index is chunks and the 2nd index contains sample points from a single iteration determined by your cycle_len.
+#         The selected channel will automatically be V1
+
+#     Parameters::
+
+#         data_name (str): File name to be accessed (from MIT-BIH/Physionet) (e.g. ``100``, ``124e06``)
+#         samp_freq (int): Sample frequecy determined by you source 
+#         channel (int): Channel from the signal to use
+#         norm_type (str): Default is '', options are ``chunks`` and ``all``. Chunks option is divided by sampling frequency, all option is dividing by average of all datapoints in the entire signal
+
+#     Example:
+
+#         get_samples(data_name='100', samp_freq=360)
+#     """
+#     # load the signal via wfdb
+#     signal = load_signal(data_name=data_name, channel=channel)
     
-    # Perform normalization.
-    # normalization per chunk (normalizes data points as divided by sampling frequency)
-    if str.lower(norm_type) == 'chunks' or str.lower(norm_type) == 'chunk':
-        noised_seg_new = normalize_by_chunks(noised_seg_new)
-        clean_seg_new = normalize_by_chunks(clean_seg_new)
-    if str.lower(norm_type) == 'all':
-        noised_seg_new = normalize(noised_seg_new)
-        clean_seg_new = normalize(clean_seg_new)
-    if str.lower(norm_type) == 'none':
-        pass
-    # Reshape ready for training
-    clean_seg_new = clean_seg_new.reshape( (clean_seg_new.shape[0], clean_seg_new.shape[1], 1) )
-    noised_seg_new = noised_seg_new.reshape( (noised_seg_new.shape[0], noised_seg_new.shape[1], 1) )
-    return noised_seg_new, clean_seg_new
+#     chunks = int(len(signal) / samp_freq)
+    
+#     signal_list = np.zeros(shape=(chunks, samp_freq))
+    
+#     sig_counter = 0
+#     for i in range(chunks):
+#         for j in range(samp_freq):
+#             signal_list[i][j] = signal[sig_counter]
+#             sig_counter = sig_counter + 1
+
+#     # Perform normalization.
+#     # normalization per chunk (normalizes data points as divided by sampling frequency)
+#     if str.lower(norm_type) == 'chunks' or str.lower(norm_type) == 'chunk':
+#         signal_list = normalize_by_chunks(signal_list)
+#     if str.lower(norm_type) == 'all':
+#         signal_list = normalize(signal_list)
+#     if str.lower(norm_type) == 'none':
+#         pass
+
+#     return signal_list
+
+
+# # Default GET_ECG method to use. Don't use others anymore huhu
+# def get_ecg_with_split(data_name, samp_freq=360, norm_type='chunks', channel=1):
+#     """
+#     DEFAULT GET_ECG METHOD TO USE
+    
+#     Use when samp_freq is not 360 (specifically the 1024 sampling frequency)
+
+#     Returns:
+#         noised_seg, clean_seg (Numpy Array):
+#             Wherein both arrays contains time-specific segments of noise and untouched ECG from the NST generator.
+#     """
+#     # load everything with a sampling frequency of 360 (easier to split)
+#     x = get_samples(data_name, samp_freq=360, channel=channel, norm_type='') # must not normalize in this part yet
+#     # Split into two (using 360 as sampling frequency as 360Hz == 1 second)
+#     noised_seg, clean_seg = split_ecg_segments(x)
+#     # Flatten the arrays noised_seg and clean_seg into 1D
+#     noised_seg = noised_seg.flatten()
+#     clean_seg = clean_seg.flatten()
+#     # Once flatten, return both ECG's according to their sampling frequency
+#     # Get the appropriate length for chunks first
+#     chunks_noised = int( len(noised_seg) / samp_freq )
+#     chunks_clean = int( len(clean_seg) / samp_freq )
+#     chunks = 0
+#     # Assures that the smaller chunk size is followed for consistency (esp during training). 
+#     if chunks_noised < chunks_clean:
+#         chunks = chunks_noised
+#     elif chunks_noised > chunks_clean:
+#         chunks = chunks_clean
+#     else:
+#         chunks = chunks_noised
+#     # create the np arrays to be returned
+#     noised_seg_new = np.zeros( (int(chunks/2), samp_freq) ) # why + 1, idk yet
+#     clean_seg_new = np.zeros( (int(chunks/2), samp_freq) )
+#     # Proceed to migrate into 2D Arrays
+#     for i in range( chunks - 1 ):
+#         if i % 2 == 0:
+#             noised_seg_new[ int(i/2) ] = noised_seg[ (samp_freq*i):((samp_freq*i)+samp_freq) ]
+#         else:
+#             clean_seg_new[ int(i/2 )] = clean_seg[ (samp_freq*i):((samp_freq*i)+samp_freq) ]
+    
+#     # Perform normalization.
+#     # normalization per chunk (normalizes data points as divided by sampling frequency)
+#     if str.lower(norm_type) == 'chunks' or str.lower(norm_type) == 'chunk':
+#         noised_seg_new = normalize_by_chunks(noised_seg_new)
+#         clean_seg_new = normalize_by_chunks(clean_seg_new)
+#     if str.lower(norm_type) == 'all':
+#         noised_seg_new = normalize(noised_seg_new)
+#         clean_seg_new = normalize(clean_seg_new)
+#     if str.lower(norm_type) == 'none':
+#         pass
+#     # Reshape ready for training
+#     clean_seg_new = clean_seg_new.reshape( (clean_seg_new.shape[0], clean_seg_new.shape[1], 1) )
+#     noised_seg_new = noised_seg_new.reshape( (noised_seg_new.shape[0], noised_seg_new.shape[1], 1) )
+#     return noised_seg_new, clean_seg_new
+
