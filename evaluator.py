@@ -81,7 +81,7 @@ def get_snr_imp_slow(sig_orig, sig_noisy, sig_decoded):
 
 
 
-def get_snr_imp(sig_orig, sig_noisy, sig_decoded, v=False):
+def get_snr_imp(sig_clean, sig_noisy, sig_decoded, v=False):
     
     snr_in = 0.0
     snr_out = 0.0
@@ -89,19 +89,16 @@ def get_snr_imp(sig_orig, sig_noisy, sig_decoded, v=False):
     upper = 0.0
     lower_in = 0.0
     lower_out = 0.0
-        
-    sig_orig = np.reshape( sig_orig, newshape=( sig_orig.shape[0] * sig_orig.shape[1]) )
-    sig_noisy = np.reshape( sig_noisy, newshape=( sig_noisy.shape[0] * sig_noisy.shape[1]) )
-    sig_decoded = np.reshape( sig_decoded, newshape=( sig_decoded.shape[0] * sig_decoded.shape[1]) )
+    
     # compute for the summation in the numerator (used for both SNRin and SNRout)
-    for i in range(len(sig_orig)):
-            upper = upper + (sig_orig[i]**2)
+    for i in range(len(sig_clean)):
+            upper = upper + (sig_clean[i]**2)
     # Compute for the summation in the denominator (used for SNRin only)
     for i in range(len(sig_noisy)):
-            lower_in = lower_in + ((sig_noisy[i] - sig_orig[i])**2)
+            lower_in = lower_in + ((sig_noisy[i] - sig_clean[i])**2)
     # Compute for the summation in the denominator (used for SNRout only)
     for i in range(len(sig_decoded)):
-            lower_out = lower_out + ((sig_decoded[i] - sig_orig[i])**2)
+            lower_out = lower_out + ((sig_decoded[i] - sig_clean[i])**2)
     
     snr_in = 10 * math.log((upper / lower_in), 10)
     snr_out = 10 * math.log((upper / lower_out), 10)
@@ -115,6 +112,16 @@ def get_snr_imp(sig_orig, sig_noisy, sig_decoded, v=False):
         print( str(snr_imp) + ' = ' + str(snr_out) + ' - ' + str(snr_in) )
     return snr_imp
 
+def compute_snr_imp(ecg_clean, ecg_noisy, ecg_denoised):
+    # iSNR = 10 * log10 ( sum( abs(orig(:) - noisy(:)) ^ 2) / sum( abs(orig(:) - restored(:) ^ 2)))
+    numer = 0
+    denom = 0
+    result = 0
+
+    
+
+    return result
+    
 def compare_qrs_detect(sig_denoised, sig_noisy):
     sig_denoised = sig_denoised.numpy()
     pass

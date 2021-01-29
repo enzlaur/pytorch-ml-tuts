@@ -149,8 +149,8 @@ def split_ecg_segments(ecg_data, start_minute=5):
 
 def realign_starting(ecg_result, ecg_clean):
     ecg_result = ecg_result
-    ecg_clean_start = ecg_clean[0].cpu().numpy()
-    diff = ecg_clean[0].cpu().numpy() - ecg_result[0]
+    ecg_clean_start = ecg_clean[0]
+    diff = ecg_clean[0] - ecg_result[0]
     print( f'Diff: {diff}' )
     print( f'{ecg_clean_start} - {ecg_clean[0]}' )
     ecg_result = ecg_result + diff
@@ -167,7 +167,7 @@ def concat_pt_full(model, ecg_noisy):
     result = model.decoder( result )
     result = result.detach().cpu().numpy()
     print( f'Result size: {result.shape}')
-    np.save('res_pt2', result) # ranges from 0:4000
+    np.save('res_pt1', result) # ranges from 0:4000
     # Second Part
     result = model.encoder( ecg_noisy[4000:5544] )
     result = model.decoder( result )
@@ -179,7 +179,7 @@ def concat_pt_full(model, ecg_noisy):
     pt2 = np.load('res_pt2.npy')
 
     pt_full = np.concatenate( (pt1, pt2) )
-    pt_full.shape
+    print(f'Complete shape is: {pt_full.shape}')
     np.save('res_pt_full', pt_full)
 
 
