@@ -1,3 +1,7 @@
 {
-    "python.pythonPath": "c:\\Users\\laure\\Developer\\pyenv-1\\Scripts\\python.exe"
+    "python.pythonPath": "C:\\python\\python.exe",
+    "notebook.kernelProviderAssociations": [
+    
+    ],
+    "jupyter.jupyterServerType": "local"
 }
