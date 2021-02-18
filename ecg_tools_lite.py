@@ -195,3 +195,21 @@ def ecg_plot_flat(ecg_clean, ecg_noisy, ecg_test, length=1024, index=0):
     plt.plot( ecg_test[ind_start:ind_end], c='blue', label='Test Data' )
     plt.title(label='Sample')
     plt.legend()
+
+
+
+def ecg_plot(ecg_sigs, labels, length=1024, index=0, title="ECG Signal"):
+    ind_start = index * length
+    ind_end = ind_start + length
+
+    if len(ecg_sigs) != len(labels):
+        print("Signal count and label count are not equal")
+        labels = np.arange(len(ecg_sigs))
+    
+    plt.figure( figsize=(20,5) )
+    # print all inside the array
+    for i, ecg_sig in enumerate(ecg_sigs):    
+        plt.plot( ecg_sig[ind_start:ind_end], label=labels[i] )
+    
+    plt.title(label=title)
+    plt.legend()
