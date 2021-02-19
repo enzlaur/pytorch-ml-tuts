@@ -77,19 +77,30 @@ def load_signal(data_name, folder='ecg_data/', v_fields=False, channel=1):
 
 # ============= NORMALIZATION =============
 
-def norm_sig( ecg_set ):
+def norm_sig( ecg_set, option=1 ):
+    """
+    Normalizes signals between option
+    (1) Between -1 and 1 (default option)
+    (2) Between 0 and 1
+
+    Return:
+    ecg_set_normed: Normalized result using option
+    """
     ecg_set_normed = ecg_set
     
-    for i, sig in enumerate(ecg_set):
-        sig = norm_global_prime(sig)
-        ecg_set_normed[i] = sig
-    
+    if option == 1:
+        for i, sig in enumerate(ecg_set):
+            sig = norm_global_prime(sig)
+            ecg_set_normed[i] = sig
+    elif option == 2:
+        for i, sig in enumerate(ecg_set):
+            sig = norm_global_opt_2(sig)
+            ecg_set_normed[i] = sig
+
     return ecg_set_normed
 
 
-
-
-def norm_global( x ):
+def norm_global_opt_1( x ):
     """
     Normalized from [0,1] [min, max]
     """
@@ -97,22 +108,26 @@ def norm_global( x ):
     return x_prime
 
 
+def norm_global_opt_2( x ):
+    x_prime = (x - x.min()) / (x.max() - x.min())
+    return x_prime;
 
 
 def norm_global_prime( x ):
     """
     Normalized from [-1,1] [min, max] (uses norm_global(x) )
     """
-    x = norm_global(x)
+    x = norm_global_opt_1(x)
     x_prime = (2*x)-1
     return x_prime
 
 # ============= 
-
+# Do not use anymore
 def norm_ecg_subsets( ecg_denoised_flat, ecg_clean_flat ):
     diff = ecg_clean_flat[0] - ecg_denoised_flat[0]
     adjusted_ecg_flat = ecg_denoised_flat + diff
     return adjusted_ecg_flat
+
 
 
 
