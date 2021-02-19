@@ -9,6 +9,27 @@ from sklearn import preprocessing # for normalizing data
 from sklearn.model_selection import train_test_split
 # Plot Import
 import matplotlib.pyplot as plt
+import time
+
+
+# Return local time in YYYY-MM-DD_hhmm format
+def get_local_time():
+    """
+    Returns local time in YYYY-MM-DD_hhmm format.
+    Useful for file naming such as saving model dicts/states
+    """
+    # Get local time (used for file saving)
+    t_year = str(time.localtime().tm_year)
+    t_mon = str(time.localtime().tm_mon)
+    t_day = str(time.localtime().tm_mday)
+    t_hr = str(time.localtime().tm_hour)
+    t_min = str(time.localtime().tm_min)
+
+    if len(t_min) == 1:
+        t_min = '0' + t_min
+
+    loc_time = t_year + '-' + t_mon + '-' + t_day + '_' + t_hr + t_min
+    return loc_time
 
 def load_ecg_file(ecg_file):
     """
@@ -161,6 +182,14 @@ def realign_starting(ecg_result, ecg_clean):
 
 
 def concat_pt_full(model, ecg_noisy):
+    """
+    Encoder result is too large to be handled thus requires splitting the result.
+
+    Returns:
+    pt_full: Numpy array of the result
+    """
+    # Create filename to be used later
+    full_file_name = 'res_pt_full_' + get_local_time()
     # Can only handle up to 4000 of the entire data set (then restart)
     # Firt Part
     result = model.encoder( ecg_noisy[0:4000] )
@@ -180,7 +209,10 @@ def concat_pt_full(model, ecg_noisy):
 
     pt_full = np.concatenate( (pt1, pt2) )
     print(f'Complete shape is: {pt_full.shape}')
-    np.save('res_pt_full', pt_full)
+
+    np.save(full_file_name, pt_full)
+    print( f'Filename: {full_file_name}' )
+    return pt_full
 
 
 
