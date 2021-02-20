@@ -10,7 +10,7 @@ from sklearn.model_selection import train_test_split
 # Plot Import
 import matplotlib.pyplot as plt
 import time
-
+import gc
 
 # Return local time in YYYY-MM-DD_hhmm format
 def get_local_time():
@@ -207,22 +207,56 @@ def concat_pt_full(model, ecg_noisy):
     full_file_name = 'res_pt_full_' + get_local_time()
     # Can only handle up to 4000 of the entire data set (then restart)
     # Firt Part
-    result = model.encoder( ecg_noisy[0:4000] )
-    result = model.decoder( result )
-    result = result.detach().cpu().numpy()
-    print( f'Result size: {result.shape}')
-    np.save('res_pt1', result) # ranges from 0:4000
+    # result = model.encoder( ecg_noisy[0:1000] )
+    # result = model.decoder( result )
+    # result = result.detach().cpu().numpy()
+    # print( f'Result size: {result.shape}')
+    # np.save('res_pt1', result) # ranges from 0:4000
+    # del result
+    # # Second Part
+    # result = model.encoder( ecg_noisy[2000:3000] )
+    # result = model.decoder( result )
+    # result = result.detach().cpu().numpy()
+    # print( f'Result size: {result.shape}')
+    # np.save('res_pt2', result)
+    # del result
+    # # Second Part
+    # result = model.encoder( ecg_noisy[2000:3000] )
+    # result = model.decoder( result )
+    # result = result.detach().cpu().numpy()
+    # print( f'Result size: {result.shape}')
+    # np.save('res_pt3', result)
+    # del result
+    # gc.collect()
     # Second Part
-    result = model.encoder( ecg_noisy[4000:5544] )
+    result = model.encoder( ecg_noisy[3000:4000] )
     result = model.decoder( result )
     result = result.detach().cpu().numpy()
     print( f'Result size: {result.shape}')
-    np.save('res_pt2', result) # ranges from 4001:5544
+    np.save('res_pt4', result)
+    del result
+    # Third Part
+    result = model.encoder( ecg_noisy[4000:5000] )
+    result = model.decoder( result )
+    result = result.detach().cpu().numpy()
+    print( f'Result size: {result.shape}')
+    np.save('res_pt5', result) # ranges from 4001:5544
+    del result
+    # Last
+    # Third Part
+    result = model.encoder( ecg_noisy[5000:5544] )
+    result = model.decoder( result )
+    result = result.detach().cpu().numpy()
+    print( f'Result size: {result.shape}')
+    np.save('res_pt6', result) # ranges from 4001:5544
 
     pt1 = np.load('res_pt1.npy')
     pt2 = np.load('res_pt2.npy')
-
-    pt_full = np.concatenate( (pt1, pt2) )
+    pt3 = np.load('res_pt3.npy')
+    pt4 = np.load('res_pt4.npy')
+    pt5 = np.load('res_pt5.npy')
+    pt5 = np.load('res_pt6.npy')
+    pt_full = np.concatenate( (pt1, pt2, pt3, pt4, pt5) )
     print(f'Complete shape is: {pt_full.shape}')
 
     np.save(full_file_name, pt_full)
