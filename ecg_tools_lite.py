@@ -77,6 +77,15 @@ def load_signal(data_name, folder='ecg_data/', v_fields=False, channel=1):
 
 # ============= NORMALIZATION =============
 
+def norm_basic( ecg_set ):
+    ecg_set_normed = ecg_set
+
+    for i, sig in enumerate(ecg_set):
+            sig = norm_global_opt_2(sig)
+            ecg_set_normed[i] = sig
+    
+    return ecg_set_normed
+
 def norm_sig( ecg_set, option=1 ):
     """
     Normalizes signals between option
@@ -194,6 +203,12 @@ def realign_starting(ecg_result, ecg_clean):
     return ecg_result
 
 
+def realign_all_chunks( ecg_result, ecg_clean ):
+    for i, sig in enumerate( ecg_result ):
+        diff = ecg_clean[i][0][0] - ecg_result[i][0][0]
+        ecg_result[i][0] = ecg_result[i][0] + diff
+    return ecg_result
+        
 
 
 def concat_pt_full(model, ecg_noisy):
