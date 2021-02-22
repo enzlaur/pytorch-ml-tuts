@@ -264,6 +264,8 @@ def ecg_plot(ecg_sigs, labels, length=1024, index=0, title="ECG Signal"):
     ind_start = index * length
     ind_end = ind_start + length
 
+    plt.figure(figsize=(20,8))
+
     if len(ecg_sigs) != len(labels):
         print("Signal count and label count are not equal")
         labels = np.arange(len(ecg_sigs))
