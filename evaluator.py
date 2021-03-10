@@ -73,7 +73,7 @@ def get_snr_imp_slow(sig_orig, sig_noisy, sig_decoded):
 
 
 
-def get_snr_imp(sig_clean, sig_noisy, sig_decoded, v=False):
+def get_snr_imp_old(sig_clean, sig_noisy, sig_decoded, v=False):
     
     snr_in = 0.0
     snr_out = 0.0
@@ -117,3 +117,28 @@ def compute_snr_imp(ecg_clean, ecg_noisy, ecg_denoised):
 def compare_qrs_detect(sig_denoised, sig_noisy):
     sig_denoised = sig_denoised.numpy()
     pass
+
+# ===== USE THIS INSTEAD =====
+def get_snr_imp(ecg_clean, ecg_noisy, ecg_denoised):
+    # Compute for the numerator
+    def get_upper( ecg_clean ):
+        upper = 0
+        for i in range( len(ecg_clean) ):
+            upper = upper + ( ecg_clean[i]**2 )
+        return upper
+    # Compute for denominator
+    def get_lower( ecg_clean, ecg_ref ):
+        lower = 0
+        # Compute for denominator
+        for i in range( len(ecg_clean) ):
+            lower = lower + ( (ecg_ref[i] - ecg_clean[i])**2 )
+        return lower
+    upper = get_upper( ecg_clean )
+    lower_in = get_lower( ecg_clean, ecg_noisy )
+    lower_out = get_lower( ecg_clean, ecg_denoised )
+    snr_in = 10 * ( math.log10( upper/lower_in) )
+    snr_out = 10 * ( math.log10( upper/lower_out) )
+    snr_imp = snr_out - snr_in
+    print( f'SNR_IN: {snr_in}')
+    print( f'SNR_out: {snr_out} ')
+    return snr_imp
