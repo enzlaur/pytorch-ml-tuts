@@ -48,3 +48,4 @@ class ae_sampler(nn.Module):
         x = self.decoder(x)
 
         return x
+
