@@ -3,117 +3,6 @@ import numpy as np
 # math
 import math
 
-
-
-
-def get_snr_in(sig_orig, sig_noisy):
-    snr = 0.0
-    upper = 0.0
-    lower = 0.0
-    for i in range(sig_orig.shape[0]):
-        for j in range(sig_orig.shape[1]):
-            upper = upper + (sig_orig[i][j]**2)
-    for i in range(sig_noisy.shape[0]):
-        for j in range(sig_noisy.shape[1]):
-            lower = lower + ((sig_noisy[i][j] - sig_orig[i][j])**2)
-    snr = 10 * math.log((upper / lower), 10)
-    return snr
-
-
-
-# ==== FOR USE WITH UPDATED PYTORCH IMP ====
-def get_snr_imp_flat(ecg_noisy, ecg_test):
-    snr = 0.0
-    upper = 0.0
-    lower = 0.0
-    
-    for i in range( len(ecg_test) ):
-        upper = upper + (ecg_test[i]**2)
-
-    for i in range( len(ecg_noisy) ):
-        lower = lower + ((ecg_noisy[i] - ecg_test[i])**2)
-
-    snr = 10 * math.log((upper/lower), 10)
-
-    return snr
-
-
-
-# ==== DEPRECATED, IGNORE =====
-def get_snr_imp_slow(sig_orig, sig_noisy, sig_decoded):
-    """
-    Very slow, do not use.
-    Use get_snr_imp instead
-    """
-    snr_in = 0.0
-    snr_out = 0.0
-    snr_imp = 0.0
-    upper = 0.0
-    lower_in = 0.0
-    lower_out = 0.0
-
-    # compute for the summation in the numerator (used for both SNRin and SNRout)
-    for i in range(sig_orig.shape[0]):
-        for j in range(sig_orig.shape[1]):
-            upper = upper + (sig_orig[i][j]**2)
-    # Compute for the summation in the denominator (used for SNRin only)
-    for i in range(sig_noisy.shape[0]):
-        for j in range(sig_noisy.shape[1]):
-            lower_in = lower_in + ((sig_noisy[i][j] - sig_orig[i][j])**2)
-    # Compute for the summation in the denominator (used for SNRout only)
-    for i in range(sig_decoded.shape[0]):
-        for j in range(sig_decoded.shape[1]):
-            lower_out = lower_out + ((sig_decoded[i][j] - sig_orig[i][j])**2)
-    snr_in = 10 * math.log((upper / lower_in), 10)
-    snr_out = 10 * math.log((upper / lower_out), 10)
-    snr_imp = snr_out - snr_in
-    print( str(snr_imp) + '=' + str(snr_out) + '-' + str(snr_in))
-    return snr_imp
-
-
-
-
-def get_snr_imp_old(sig_clean, sig_noisy, sig_decoded, v=False):
-    
-    snr_in = 0.0
-    snr_out = 0.0
-    snr_imp = 0.0
-    upper = 0.0
-    lower_in = 0.0
-    lower_out = 0.0
-    
-    # compute for the summation in the numerator (used for both SNRin and SNRout)
-    for i in range(len(sig_clean)):
-            upper = upper + (sig_clean[i]**2)
-    # Compute for the summation in the denominator (used for SNRin only)
-    for i in range(len(sig_noisy)):
-            lower_in = lower_in + ((sig_noisy[i] - sig_clean[i])**2)
-    # Compute for the summation in the denominator (used for SNRout only)
-    for i in range(len(sig_decoded)):
-            lower_out = lower_out + ((sig_decoded[i] - sig_clean[i])**2)
-    
-    snr_in = 10 * math.log((upper / lower_in), 10)
-    snr_out = 10 * math.log((upper / lower_out), 10)
-    snr_imp = snr_out - snr_in
-
-    snr_in = np.around(snr_in, 2)
-    snr_out = np.around(snr_out, 2)
-    snr_imp = np.around(snr_imp, 2)
-
-    if v == True:
-        print( str(snr_imp) + ' = ' + str(snr_out) + ' - ' + str(snr_in) )
-    return snr_imp
-
-def compute_snr_imp(ecg_clean, ecg_noisy, ecg_denoised):
-    # iSNR = 10 * log10 ( sum( abs(orig(:) - noisy(:)) ^ 2) / sum( abs(orig(:) - restored(:) ^ 2)))
-    numer = 0
-    denom = 0
-    result = 0
-
-    
-
-    return result
-    
 def compare_qrs_detect(sig_denoised, sig_noisy):
     sig_denoised = sig_denoised.numpy()
     pass
@@ -141,4 +30,75 @@ def get_snr_imp(ecg_clean, ecg_noisy, ecg_denoised):
     snr_imp = snr_out - snr_in
     print( f'SNR_IN: {snr_in}')
     print( f'SNR_out: {snr_out} ')
+    print( f'SNR Improvement: {snr_imp}')
     return snr_imp
+
+def get_rmse( ecg_clean, ecg_ref ):
+    result = 0
+    # Compute for the summation in formula
+    def get_sumt_res( ecg_clean, ecg_ref ):
+        sumt_res = 0
+        # Compute for denominator
+        for i in range( len(ecg_clean) ):
+            sumt_res = sumt_res + ( (ecg_clean[i] - ecg_ref[i])**2 )
+        return sumt_res
+    
+    result = math.sqrt( (1/len(ecg_clean)) * (get_sumt_res(ecg_clean, ecg_ref)) )
+    print( f'RMSE: {result}' )
+    return result
+
+def get_prd(ecg_clean, ecg_ref):
+    result = 0
+    def get_numerator( ecg_clean, ecg_ref ):
+        res = 0
+        # Compute for denominator
+        for i in range( len(ecg_clean) ):
+            res = res + ( (ecg_clean[i] - ecg_ref[i])**2 )
+        return res
+    def get_denominator( ecg_clean):
+        res = 0
+        for i in range( len(ecg_clean) ):
+            res = res + ( ecg_clean[i]**2 )
+        return res
+    result = math.sqrt( ((get_numerator(ecg_clean, ecg_ref)/get_denominator(ecg_clean)) * 100) )
+    print( f'PRD: {result}' )
+    return result
+
+def get_eval_metrics(ecg_clean, ecg_noisy, ecg_denoised, verb=True):
+    def compute_x_sqrd( ecg_clean ):
+        res = 0
+        for i in range( len(ecg_clean) ):
+            res = res + ( ecg_clean[i]**2 )
+        return res
+    def compute_snr_denominator( ecg_clean, ecg_ref):
+        lower = 0
+        # Compute for denominator
+        for i in range( len(ecg_clean) ):
+            lower = lower + ( (ecg_ref[i] - ecg_clean[i])**2 )
+        return lower
+    def compute_prd_num( ecg_clean, ecg_ref ):
+        res = 0
+        # Compute for denominator
+        for i in range( len(ecg_clean) ):
+            res = res + ( (ecg_clean[i] - ecg_ref[i])**2 )
+        return res
+    # result[SNRimp, RMSE, PRD]
+    result = [0, 0, 0]
+    # populate constants when computing
+    x_sqrd = compute_x_sqrd(ecg_clean) # used in all 3 eval metrics
+    recon_diff = compute_prd_num(ecg_clean, ecg_denoised) # used in PRD and RMSE
+    snr_in_denom = compute_snr_denominator(ecg_clean, ecg_noisy)
+    snr_out_denom = compute_snr_denominator(ecg_clean, ecg_denoised)
+    # Compute SNR in and out
+    snr_in_res = 10 * ( math.log10( x_sqrd/snr_in_denom) )
+    snr_out_res = 10 * ( math.log10( x_sqrd/snr_out_denom) )
+    # Final eval results
+    snr_imp = snr_out_res - snr_in_res
+    rmse = math.sqrt( (1/len(ecg_clean)) * ( recon_diff ) )
+    prd = math.sqrt( ((recon_diff/x_sqrd) * 100) )
+    result = [snr_imp, rmse, prd]
+    if verb:
+        print( f'SNR Improvement: {snr_imp}')
+        print( f'RMSE: {rmse}')
+        print( f'PRD: {prd}')
+    return result
