@@ -49,3 +49,44 @@ class ae_sampler(nn.Module):
 
         return x
 
+class cnn_denoiser(nn.Module):    
+    def __init__(self):
+        super(cnn_denoiser, self).__init__()
+        
+        self.denoiser = nn.Sequential(
+            nn.Conv1d(1, 36, kernel_size=19, stride=1, padding=9),
+            nn.BatchNorm1d(36),
+            nn.ReLU(True),
+            # nn.AvgPool1d(kernel_size=2, stride=4),
+
+            nn.Conv1d(36, 36, kernel_size=19, stride=1, padding=9),
+            nn.BatchNorm1d(36),
+            nn.ReLU(True),
+            # nn.AvgPool1d(kernel_size=2, stride=4),
+
+            nn.Conv1d(36, 36, kernel_size=19, stride=1, padding=9),
+            nn.BatchNorm1d(36),
+            nn.ReLU(True),
+            # nn.AvgPool1d(kernel_size=2, stride=4),
+
+            nn.Conv1d(36, 36, kernel_size=19, stride=1, padding=9),
+            nn.BatchNorm1d(36),
+            nn.ReLU(True),
+            # nn.AvgPool1d(kernel_size=2, stride=4),
+
+            nn.Conv1d(36, 36, kernel_size=19, stride=1, padding=9),
+            nn.BatchNorm1d(36),
+            nn.ReLU(True),
+            # nn.AvgPool1d(kernel_size=2, stride=4),
+
+            nn.Conv1d(36, 36, kernel_size=19, stride=1, padding=9),
+            nn.BatchNorm1d(36),
+            nn.ReLU(True),
+            # nn.AvgPool1d(kernel_size=2, stride=4),
+
+            nn.Linear(1024, 1024)
+        )
+
+    def forward(self, x):
+        x = self.denoiser(x)
+        return x

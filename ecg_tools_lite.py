@@ -10,7 +10,11 @@ from sklearn.model_selection import train_test_split
 # Plot Import
 import matplotlib.pyplot as plt
 import time
-
+# Pytorch
+import torch
+from torch import nn
+from torch.utils.data import DataLoader, Dataset, random_split
+import trainer as tr
 
 # Return local time in YYYY-MM-DD_hhmm format
 def get_local_time():
@@ -277,3 +281,34 @@ def ecg_plot(ecg_sigs, labels, length=1024, index=0, title="ECG Signal"):
     
     plt.title(label=title)
     plt.legend()
+
+def train_model( model, epochs, ecg_noisy, ecg_clean, train_pct=0.8):
+    # Train a new model
+    # move model to be run by gpu
+    train_model = model().cuda()
+    train_model.double()
+
+    # start training the model
+    losses = tr.train_model( model=train_model,
+                    epochs=epochs, 
+                    ecg_noisy=ecg_noisy, 
+                    ecg_clean=ecg_clean,
+                    train_pct=train_pct)
+    
+    save_file_name = 'model_' + str(get_local_time()) + '.pt';
+    
+    # saved model will have model_YYYY-MM-DD_hhmm.pt format
+    torch.save(train_model.state_dict(), save_file_name)
+    print(f'Saved {get_local_time()}')
+
+def load_model(model_name, model):
+    print( f"Loading model {model_name}. (make sure name ends in .pt)")
+    
+    loaded_model = model().cuda()
+    loaded_model.double()
+    loaded_model.load_state_dict(torch.load(model_name))
+    loaded_model.to('cuda')
+    loaded_model.eval()    
+    print( f'Model {model_name} has been loaded')
+    
+    return loaded_model
