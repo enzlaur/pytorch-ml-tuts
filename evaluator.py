@@ -2,6 +2,7 @@
 import numpy as np
 # math
 import math
+import time
 
 def compare_qrs_detect(sig_denoised, sig_noisy):
     sig_denoised = sig_denoised.numpy()
@@ -82,6 +83,8 @@ def get_eval_metrics(ecg_clean, ecg_noisy, ecg_denoised, verb=True):
         for i in range( len(ecg_clean) ):
             res = res + ( (ecg_clean[i] - ecg_ref[i])**2 )
         return res
+    # Timer start
+    elapsed_start = time.time()
     # result[SNRimp, RMSE, PRD]
     result = [0, 0, 0]
     # populate constants when computing
@@ -101,4 +104,11 @@ def get_eval_metrics(ecg_clean, ecg_noisy, ecg_denoised, verb=True):
         print( f'SNR Improvement: {snr_imp}')
         print( f'RMSE: {rmse}')
         print( f'PRD: {prd}')
+    # Show elapsed time
+    elapsed_end = time.time()
+    elapsed_total = elapsed_end-elapsed_start
+    elapsed_mins = int(elapsed_total/60)
+    elapsed_secs = int(elapsed_total - (60 * elapsed_mins))
+    print(f'Elapsed time: {elapsed_total:.2f}, (in mins: {elapsed_mins}:{elapsed_secs})')
+    
     return result

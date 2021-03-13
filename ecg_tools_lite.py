@@ -226,22 +226,137 @@ def concat_pt_full(model, ecg_noisy):
     full_file_name = 'res_pt_full_' + get_local_time()
     # Can only handle up to 4000 of the entire data set (then restart)
     # Firt Part
-    result = model.encoder( ecg_noisy[0:4000] )
+    result = model.encoder( ecg_noisy[0:2000] )
     result = model.decoder( result )
     result = result.detach().cpu().numpy()
     print( f'Result size: {result.shape}')
     np.save('res_pt1', result) # ranges from 0:4000
+
     # Second Part
-    result = model.encoder( ecg_noisy[4000:5544] )
+    result = model.encoder( ecg_noisy[2000:4000] )
     result = model.decoder( result )
     result = result.detach().cpu().numpy()
     print( f'Result size: {result.shape}')
     np.save('res_pt2', result) # ranges from 4001:5544
+    
+    # Third Part
+    result = model.encoder( ecg_noisy[4000:6000] )
+    result = model.decoder( result )
+    result = result.detach().cpu().numpy()
+    print( f'Result size: {result.shape}')
+    np.save('res_pt3', result) # ranges from 4001:5544
+    
+    result = model.encoder( ecg_noisy[6000:8000] )
+    result = model.decoder( result )
+    result = result.detach().cpu().numpy()
+    print( f'Result size: {result.shape}')
+    np.save('res_pt4', result) 
 
+    result = model.encoder( ecg_noisy[8000:10000] )
+    result = model.decoder( result )
+    result = result.detach().cpu().numpy()
+    print( f'Result size: {result.shape}')
+    np.save('res_pt5', result) 
+
+    result = model.encoder( ecg_noisy[10000:12000] )
+    result = model.decoder( result )
+    result = result.detach().cpu().numpy()
+    print( f'Result size: {result.shape}')
+    np.save('res_pt6', result)
+
+    result = model.encoder( ecg_noisy[12000:14000] )
+    result = model.decoder( result )
+    result = result.detach().cpu().numpy()
+    print( f'Result size: {result.shape}')
+    np.save('res_pt7', result)
+
+    result = model.encoder( ecg_noisy[14000:16000] )
+    result = model.decoder( result )
+    result = result.detach().cpu().numpy()
+    print( f'Result size: {result.shape}')
+    np.save('res_pt8', result)
+
+    result = model.encoder( ecg_noisy[16000:18000] )
+    result = model.decoder( result )
+    result = result.detach().cpu().numpy()
+    print( f'Result size: {result.shape}')
+    np.save('res_pt9', result)
+
+    result = model.encoder( ecg_noisy[18000:20000] )
+    result = model.decoder( result )
+    result = result.detach().cpu().numpy()
+    print( f'Result size: {result.shape}')
+    np.save('res_pt10', result)
+
+    result = model.encoder( ecg_noisy[20000:22000] )
+    result = model.decoder( result )
+    result = result.detach().cpu().numpy()
+    print( f'Result size: {result.shape}')
+    np.save('res_pt11', result)
+    
+    result = model.encoder( ecg_noisy[20000:22000] )
+    result = model.decoder( result )
+    result = result.detach().cpu().numpy()
+    print( f'Result size: {result.shape}')
+    np.save('res_pt12', result)
+
+    result = model.encoder( ecg_noisy[22000:24000] )
+    result = model.decoder( result )
+    result = result.detach().cpu().numpy()
+    print( f'Result size: {result.shape}')
+    np.save('res_pt13', result)
+
+    result = model.encoder( ecg_noisy[24000:26000] )
+    result = model.decoder( result )
+    result = result.detach().cpu().numpy()
+    print( f'Result size: {result.shape}')
+    np.save('res_pt14', result)
+
+    result = model.encoder( ecg_noisy[26000:28000] )
+    result = model.decoder( result )
+    result = result.detach().cpu().numpy()
+    print( f'Result size: {result.shape}')
+    np.save('res_pt15', result)
+
+    result = model.encoder( ecg_noisy[28000:30000] )
+    result = model.decoder( result )
+    result = result.detach().cpu().numpy()
+    print( f'Result size: {result.shape}')
+    np.save('res_pt16', result)
+
+    result = model.encoder( ecg_noisy[30000:32000] )
+    result = model.decoder( result )
+    result = result.detach().cpu().numpy()
+    print( f'Result size: {result.shape}')
+    np.save('res_pt17', result)
+
+    result = model.encoder( ecg_noisy[32000:33264] )
+    result = model.decoder( result )
+    result = result.detach().cpu().numpy()
+    print( f'Result size: {result.shape}')
+    np.save('res_pt18', result)
+
+    # Load files
     pt1 = np.load('res_pt1.npy')
     pt2 = np.load('res_pt2.npy')
+    pt3 = np.load('res_pt3.npy')
+    pt4 = np.load('res_pt4.npy')
+    pt5 = np.load('res_pt5.npy')
+    pt6 = np.load('res_pt6.npy')
+    pt7 = np.load('res_pt7.npy')
+    pt8 = np.load('res_pt8.npy')
+    pt9 = np.load('res_pt9.npy')
+    pt10 = np.load('res_pt10.npy')
+    pt11 = np.load('res_pt11.npy')
+    pt12 = np.load('res_pt12.npy')
+    pt13 = np.load('res_pt13.npy')
+    pt14 = np.load('res_pt14.npy')
+    pt15 = np.load('res_pt15.npy')
+    pt16 = np.load('res_pt16.npy')
+    pt17 = np.load('res_pt17.npy')
+    pt18 = np.load('res_pt18.npy')    
 
-    pt_full = np.concatenate( (pt1, pt2) )
+    pt_full = np.concatenate( (pt1, pt2, pt3, pt4, pt5, pt6, pt7, pt8, pt9, pt10, pt11, pt12, pt13, pt14, pt15, pt16, pt17, pt18) )
     print(f'Complete shape is: {pt_full.shape}')
 
     np.save(full_file_name, pt_full)
@@ -299,7 +414,9 @@ def train_model( model, epochs, ecg_noisy, ecg_clean, train_pct=0.8):
     
     # saved model will have model_YYYY-MM-DD_hhmm.pt format
     torch.save(train_model.state_dict(), save_file_name)
-    print(f'Saved {get_local_time()}')
+    print(f'Saved {save_file_name}')
+
+    return train_model
 
 def load_model(model_name, model):
     print( f"Loading model {model_name}. (make sure name ends in .pt)")
@@ -312,3 +429,6 @@ def load_model(model_name, model):
     print( f'Model {model_name} has been loaded')
     
     return loaded_model
+
+def get_eval_results( ecg_clean, ecg_noisy, ecg_res):
+    pass
