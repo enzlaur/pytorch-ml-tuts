@@ -312,29 +312,29 @@ def concat_pt_full(model, ecg_noisy):
     print( f'Result size: {result.shape}')
     np.save('res_pt14', result)
 
-    result = model.encoder( ecg_noisy[26000:28000] )
+    result = model.encoder( ecg_noisy[26000:27720] )
     result = model.decoder( result )
     result = result.detach().cpu().numpy()
     print( f'Result size: {result.shape}')
     np.save('res_pt15', result)
 
-    result = model.encoder( ecg_noisy[28000:30000] )
-    result = model.decoder( result )
-    result = result.detach().cpu().numpy()
-    print( f'Result size: {result.shape}')
-    np.save('res_pt16', result)
+    # result = model.encoder( ecg_noisy[28000:30000] )
+    # result = model.decoder( result )
+    # result = result.detach().cpu().numpy()
+    # print( f'Result size: {result.shape}')
+    # np.save('res_pt16', result)
 
-    result = model.encoder( ecg_noisy[30000:32000] )
-    result = model.decoder( result )
-    result = result.detach().cpu().numpy()
-    print( f'Result size: {result.shape}')
-    np.save('res_pt17', result)
+    # result = model.encoder( ecg_noisy[30000:32000] )
+    # result = model.decoder( result )
+    # result = result.detach().cpu().numpy()
+    # print( f'Result size: {result.shape}')
+    # np.save('res_pt17', result)
 
-    result = model.encoder( ecg_noisy[32000:33264] )
-    result = model.decoder( result )
-    result = result.detach().cpu().numpy()
-    print( f'Result size: {result.shape}')
-    np.save('res_pt18', result)
+    # result = model.encoder( ecg_noisy[32000:33264] )
+    # result = model.decoder( result )
+    # result = result.detach().cpu().numpy()
+    # print( f'Result size: {result.shape}')
+    # np.save('res_pt18', result)
 
     # Load files
     pt1 = np.load('res_pt1.npy')
@@ -352,11 +352,122 @@ def concat_pt_full(model, ecg_noisy):
     pt13 = np.load('res_pt13.npy')
     pt14 = np.load('res_pt14.npy')
     pt15 = np.load('res_pt15.npy')
-    pt16 = np.load('res_pt16.npy')
-    pt17 = np.load('res_pt17.npy')
-    pt18 = np.load('res_pt18.npy')    
+    # pt16 = np.load('res_pt16.npy')
+    # pt17 = np.load('res_pt17.npy')
+    # pt18 = np.load('res_pt18.npy')    
 
-    pt_full = np.concatenate( (pt1, pt2, pt3, pt4, pt5, pt6, pt7, pt8, pt9, pt10, pt11, pt12, pt13, pt14, pt15, pt16, pt17, pt18) )
+    pt_full = np.concatenate( (pt1, pt2, pt3, pt4, pt5, pt6, pt7, pt8, pt9, pt10, pt11, pt12, pt13, pt14, pt15) )#, pt16, pt17, pt18) )
+    print(f'Complete shape is: {pt_full.shape}')
+
+    np.save(full_file_name, pt_full)
+    print( f'Filename: {full_file_name}' )
+    return pt_full
+
+def concat_pt_full_dae(model, ecg_noisy):
+    """
+    Encoder result is too large to be handled thus requires splitting the result.
+
+    Returns:
+    pt_full: Numpy array of the result
+    """
+    # Create filename to be used later
+    full_file_name = 'res_pt_full_' + get_local_time()
+    # Can only handle up to 4000 of the entire data set (then restart)
+    # Firt Part
+    result = model.encoder( ecg_noisy[0:2000] )
+    result = model.decoder( result )
+    result = result.detach().cpu().numpy()
+    print( f'Result size: {result.shape}')
+    np.save('res_pt1', result) # ranges from 0:4000
+
+    # Second Part
+    result = model.encoder( ecg_noisy[2000:4000] )
+    result = model.decoder( result )
+    result = result.detach().cpu().numpy()
+    print( f'Result size: {result.shape}')
+    np.save('res_pt2', result) # ranges from 4001:5544
+    
+    # Third Part
+    result = model.encoder( ecg_noisy[4000:5000] )
+    result = model.decoder( result )
+    result = result.detach().cpu().numpy()
+    print( f'Result size: {result.shape}')
+    np.save('res_pt3', result) # ranges from 4001:5544
+    
+    result = model.encoder( ecg_noisy[5000:5544] )
+    result = model.decoder( result )
+    result = result.detach().cpu().numpy()
+    print( f'Result size: {result.shape}')
+    np.save('res_pt4', result) 
+
+    # Load files
+    pt1 = np.load('res_pt1.npy')
+    pt2 = np.load('res_pt2.npy')
+    pt3 = np.load('res_pt3.npy')
+    pt4 = np.load('res_pt4.npy')
+
+    pt_full = np.concatenate( (pt1, pt2, pt3, pt4) )
+    print(f'Complete shape is: {pt_full.shape}')
+
+    np.save(full_file_name, pt_full)
+    print( f'Filename: {full_file_name}' )
+    return pt_full
+
+def concat_pt_full_cnn(model, ecg_noisy):
+    """
+    Encoder result is too large to be handled thus requires splitting the result.
+
+    Returns:
+    pt_full: Numpy array of the result
+    """
+    # Create filename to be used later
+    full_file_name = 'res_pt_full_' + get_local_time()
+    # Can only handle up to 4000 of the entire data set (then restart)
+    # Firt Part
+    result = model.denoiser( ecg_noisy[0:1000] )
+    result = result.detach().cpu().numpy()
+    print( f'Result size: {result.shape}')
+    np.save('res_pt1', result) # ranges from 0:4000
+
+    # Second Part
+    result = model.denoiser( ecg_noisy[1000:2000] )
+    result = result.detach().cpu().numpy()
+    print( f'Result size: {result.shape}')
+    np.save('res_pt2', result) # ranges from 4001:5544
+    
+    # Third Part
+    result = model.denoiser( ecg_noisy[2000:3000] )
+    result = result.detach().cpu().numpy()
+    print( f'Result size: {result.shape}')
+    np.save('res_pt3', result) 
+    
+    # Third Part
+    result = model.denoiser( ecg_noisy[3000:4000] )
+    result = result.detach().cpu().numpy()
+    print( f'Result size: {result.shape}')
+    np.save('res_pt4', result) 
+    
+    # Third Part
+    result = model.denoiser( ecg_noisy[4000:5000] )
+    result = result.detach().cpu().numpy()
+    print( f'Result size: {result.shape}')
+    np.save('res_pt5', result)
+    
+    # Third Part
+    result = model.denoiser( ecg_noisy[5000:5544] )
+    result = result.detach().cpu().numpy()
+    print( f'Result size: {result.shape}')
+    np.save('res_pt6', result)
+    
+    # Load files
+    pt1 = np.load('res_pt1.npy')
+    pt2 = np.load('res_pt2.npy')
+    pt3 = np.load('res_pt3.npy')
+    pt4 = np.load('res_pt4.npy')
+    pt5 = np.load('res_pt5.npy')
+    pt6 = np.load('res_pt6.npy')
+
+    pt_full = np.concatenate( (pt1, pt2, pt3, pt4, pt5, pt6) )
     print(f'Complete shape is: {pt_full.shape}')
 
     np.save(full_file_name, pt_full)
