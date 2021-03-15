@@ -84,6 +84,11 @@ class cnn_denoiser(nn.Module):
             nn.ReLU(True),
             # nn.AvgPool1d(kernel_size=2, stride=4),
 
+            nn.Conv1d(36, 1, kernel_size=19, stride=1, padding=9),
+            nn.BatchNorm1d(1),
+            nn.ReLU(True),
+            # nn.AvgPool1d(kernel_size=2, stride=4),
+
             nn.Linear(1024, 1024)
         )
 

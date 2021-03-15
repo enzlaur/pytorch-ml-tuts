@@ -413,7 +413,7 @@ def concat_pt_full_dae(model, ecg_noisy):
     print( f'Filename: {full_file_name}' )
     return pt_full
 
-def concat_pt_full_cnn(model, ecg_noisy):
+def concat_pt_full_cnn(model, ecg_noisy, file_name):
     """
     Encoder result is too large to be handled thus requires splitting the result.
 
@@ -421,7 +421,10 @@ def concat_pt_full_cnn(model, ecg_noisy):
     pt_full: Numpy array of the result
     """
     # Create filename to be used later
-    full_file_name = 'res_pt_full_' + get_local_time()
+    if len(file_name) < 2 or file_name is None:
+        full_file_name = 'res_pt_full_' + get_local_time()
+    else:
+        full_file_name = file_name
     # Can only handle up to 4000 of the entire data set (then restart)
     # Firt Part
     result = model.denoiser( ecg_noisy[0:1000] )

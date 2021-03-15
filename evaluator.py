@@ -3,6 +3,8 @@ import numpy as np
 # math
 import math
 import time
+import wfdb
+from wfdb import processing
 
 def compare_qrs_detect(sig_denoised, sig_noisy):
     sig_denoised = sig_denoised.numpy()
@@ -112,3 +114,13 @@ def get_eval_metrics(ecg_clean, ecg_noisy, ecg_denoised, verb=True):
     print(f'Elapsed time: {elapsed_total:.2f}, (in mins: {elapsed_mins}:{elapsed_secs})')
     
     return result
+
+def qrs_detector(ecg_clean, ecg_noisy, ecg_res):
+    qrs_inds_clean = processing.xqrs_detect(sig=ecg_clean, fs=360)
+    qrs_inds_noisy = processing.xqrs_detect(sig=ecg_noisy, fs=360)
+    qrs_inds_res = processing.xqrs_detect(sig=ecg_res, fs=360)
+    
+    print( f'QRS Clean: {len(qrs_inds_clean)}')
+    print( f'QRS Noisy: {len(qrs_inds_noisy)}')
+    print( f'QRS Res: {len(qrs_inds_res)}')
+    pass
