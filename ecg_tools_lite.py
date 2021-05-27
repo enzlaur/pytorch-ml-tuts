@@ -481,6 +481,9 @@ def concat_pt_full_cnn(model, ecg_noisy, file_name):
 
 
 def ecg_plot_flat(ecg_clean, ecg_noisy, ecg_test, length=1024, index=0):
+    """
+    Deprecated, use ecg_plot(...) instead.
+    """
     ind_start = index * length
     ind_end = ind_start + length
 
@@ -492,8 +495,41 @@ def ecg_plot_flat(ecg_clean, ecg_noisy, ecg_test, length=1024, index=0):
     plt.legend()
 
 
+# ==== PLOTTING ====
+def ecg_plot(ecg_sigs, labels, x_label='Sample Point', y_label='Amplitude', length=1024, index=0, title="ECG Signal", ):
+    """
+    Used to plot ECG signals (more than one) alongside their appropriate labels.
+    Does not return anything but printout a MATPLOTLIB.PLOT for visualization.
 
-def ecg_plot(ecg_sigs, labels, length=1024, index=0, title="ECG Signal"):
+    Returns:
+
+        None: Runs a visualization of input data only (for use with Jupyter Notebook or an image will run outside showing the
+            visualization).
+
+    Parameters:
+
+        ecg_sigs (numpy array): 
+            Array of np arrays -> E.g. ecg_plot( [signal_1, signal_2], ...)
+        
+        labels (String array): 
+            An array of strings. E.g. ecg_plot( [signal_1, signal_2], ['Label for Signal_1', 'Label for Signal_2'])
+        
+        x_label (String):
+            Label for the x-axis (usually time based such as Sample Points of the ECG signal). Default="Sample Points (0 to 1024)"
+
+        y_label (String):
+            Label for the y-axis of the graph (usually Amplitude). Default="Amplitude"
+
+        length (int):
+            Length of the sample points. Default=1024
+
+        index (int):
+            Index of the ECG signal fragment (which is divided for every value stated in the length e.g. 1024).
+
+        title (String):
+            Title of the Plot. Default="ECG Signal"
+    """
+
     ind_start = index * length
     ind_end = ind_start + length
 
@@ -510,6 +546,11 @@ def ecg_plot(ecg_sigs, labels, length=1024, index=0, title="ECG Signal"):
     
     plt.title(label=title)
     plt.legend()
+    plt.xlabel(x_label)
+    plt.ylabel(y_label)
+
+
+
 
 def train_model( model, epochs, ecg_noisy, ecg_clean, train_pct=0.8):
     # Train a new model
